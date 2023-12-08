@@ -1,0 +1,20 @@
+SELECT id, title, ts_rank(to_tsvector(cont), plainto_tsquery('текст запроса'))
+FROM mytable
+WHERE to_tsvector(cont) @@ plainto_tsquery('текст запроса')
+ORDER BY ts_rank(to_tsvector(cont), plainto_tsquery('текст запроса')) DESC;
+
+**************************************************************************************
+
+ALTER TABLE mytable
+ADD COLUMN ts TSVECTOR GENERATED ALWAYS AS (to_tsvector('english', cont)) STORED;
+
+**************************************************************************************
+
+CREATE INDEX ts_idx ON mytable USING GIN (ts);
+
+**************************************************************************************
+
+SELECT id, title, ts_rank(ts, plainto_tsquery('текст запроса'))
+FROM mytable
+WHERE ts @@ plainto_tsquery('текст запроса')
+ORDER BY ts_rank(ts, plainto_tsquery('текст запроса')) DESC;
